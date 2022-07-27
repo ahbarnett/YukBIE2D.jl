@@ -8,7 +8,8 @@ export
     unitcircle,
     starfish,
     interpmat1d,
-    clencurt
+    clencurt,
+    chebydiffmat
 
 include("layerpots.jl")
 export
