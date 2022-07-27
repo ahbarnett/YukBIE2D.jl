@@ -7,6 +7,7 @@ function di(x)
     println(String(take!(io)))  # yuk
 end
 
+
 """
 interpmat1d(t,s) interpolation matrix from source nodes s to target nodes t
 """
@@ -21,8 +22,9 @@ end
 """
 unitcircle(N::Integer)
     
-Periodic trap rule quadrature for unit circle. Returns nodes, weights.
-The first node is at (1,0).
+Periodic trap rule quadrature for unit circle. Returns 2*N node coords,
+N weights.
+The first node is at [1;0]
 """
 function unitcircle(N::Integer)
     th = (0:N-1)/N*2*pi
@@ -34,8 +36,9 @@ end
 """
 starfish(N::Integer=100,freq::Integer=5,ampl=0.3,rot=1.0) -> x,w
     
-Periodic trap rule quadrature for smooth starfish. Returns nodes, weights.
-The first node is at theta=0.
+Periodic trap rule quadrature for smooth starfish. Returns 2*N node coords,
+N weights. The first node is at theta=0.
+
 *** to doc
 """
 function starfish(N::Integer=100,freq::Integer=5,ampl=0.3,rot=1.0)
