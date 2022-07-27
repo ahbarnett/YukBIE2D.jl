@@ -25,7 +25,7 @@ end
 """
 clencurt(n::Integer) -> nodes, weights
 for (n+1)-point Clenshaw-Curtis quadrature on [-1,1].
-Taken from Toby Driscoll's RNC book. n must be even.
+Taken from Toby Driscoll's RNC book. n must be even. nodes in ascending order
 """
 function clencurt(n)
     @assert iseven(n) "Value of `n` must be an even integer."
@@ -47,14 +47,14 @@ end
     `D` and N+1 Chebychev nodes `x`, for the standard 1D interval [-1,1].
     The matrix multiplies a vector of function values
     at these nodes to give an approximation to the vector of derivative values.
-    Note, nodes are in descending order starting at 1.0 and ending at -1.0.
+    Note: nodes are in ascending order starting at -1.0 and ending at 1.0.
     Adapted from L N Trefethen's cheb.m from "Spectral Methods in MATLAB" book.
 """
 function chebydiffmat(N)
     if N==0
         x=1; D=0
     else
-        x = cos.(π*(0:N)/N)
+        x = -cos.(π*(0:N)/N)          # LNT had descending (+ sign)
         c = [2; ones(N-1); 2] .* (-1).^(0:N)
         X = x*ones(N+1)'              # duplicates nodes in each col
         dX = X-X'                     # matrix of pairwise node differences
