@@ -1,6 +1,5 @@
 using YukBIE2D
 using Test
 
-@testset "YukBIE2D.jl" begin
-    # Write your tests here.
-end
+include("test_utils.jl")
+include("test_layerpot.jl")

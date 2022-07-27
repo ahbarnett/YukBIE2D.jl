@@ -1,5 +1,18 @@
 module YukBIE2D
+# Yukawa layer potentials evaluation module in Julia.
+# Barnett 7/25/22
 
-# Write your package code here.
+include("utils.jl")
+export
+    di,
+    unitcircle,
+    starfish,
+    interpmat1d
+
+include("layerpots.jl")
+export
+    YukSLP,
+    YukSLPmat,
+    YukSLPmat_selfcrude
 
 end

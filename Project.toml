@@ -3,6 +3,12 @@ uuid = "6c4e50e7-587b-496d-86de-874d9654d0c4"
 authors = ["ahbarnett <alex.h.barnett@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+Bessels = "0e736298-9ec6-45e8-9647-e4fc86a2fe38"
+Gnuplot = "dc211083-a33a-5b79-959f-2ff34033469d"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
 [compat]
 julia = "1"
 
