@@ -4,10 +4,8 @@ using LinearAlgebra
 @info "testing layerpot (YukSLP and related)..."
 
 ka = 0.8       # kappa = phi = Yukawa inverse length
-r = 1.5; th0 = 1.2
-tx = [r*cos(th0),r*sin(th0)]   # targ loc
-N = 80
-sx,sw = unitcircle(N)
+r = 1.5; th0 = 1.2; tx = [r*cos(th0),r*sin(th0)]   # targ loc
+N = 80; sx,sw = unitcircle(N)      # source curve
 
 # Notes about test framework:
 # * is the testset name supposed to be long description or a keyword?
