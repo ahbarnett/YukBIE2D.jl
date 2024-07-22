@@ -1,6 +1,7 @@
 # random Alex utils
 
 using LinearAlgebra    # needed for I
+using FFTW
 
 function di(x)
     """Print condensed form of a variable (REPL style) to screen"""
@@ -65,26 +66,69 @@ function chebydiffmat(N)
 end
 
 
+# following pulled from BIEbook ----------------
+"""
+    perispec_deriv!(F::Vector{T}, f::Vector{T}) where T <: Complex
+
+Non-allocating version of `perispec_deriv`, for complex input to
+complex output. Writes into 1st array.
+"""
+function perispec_deriv!(F::Vector{T}, f::Vector{T}) where T<:Complex
+    # note we don't bother with 2x speed version for real-to-real
+    N = length(f)
+    kmax = (N-1)÷2
+    filt = [1im*(-kmax:-1); 0; 1im*(1:kmax)]   # freqs -kmax:kmax
+    if N%2==0 filt = [0; filt] end   # 0 in Nyquist keeps real for real input
+    F .= ifft(fft(f) .* ifftshift(filt))     # filter f
+end
+"""
+    F::Vector{T} = perispec_deriv(f::Vector{T})
+
+Uses FFT to compute the vector of samples `f'` of the derivative of a given
+smooth 2pi-periodic function approximated by its given vector of samples `f`.
+The input and output sample points are the same, and assumed equispaced on
+some 2pi-periodic interval.
+
+The reality of output is same as input (ie, real->real, or complex->complex)
+"""
+function perispec_deriv(f::Vector{T}) where T<:Complex
+    F = similar(f)
+    perispec_deriv!(F,f)
+    F
+end
+function perispec_deriv(f::Vector{T}) where T<:Real
+    F = similar(f, complex(T))            # promote and work in complex
+    perispec_deriv!(F,complex(f))
+    real.(F)
+end
+# -------------------------------------------------
+
 
 """
-unitcircle(N::Integer)
+x,w,nx,kappa = unitcircle(N::Integer)
     
-Periodic trap rule quadrature for unit circle. Returns 2*N node coords,
-N weights.
-The first node is at [1;0]
+Periodic trap rule quadrature for unit circle.
+Returns x = 2*N node coords, w = N weights. 
+nx is unit normals 2*N, kappa is curvatures.
+The first node is at theta=0.
+    
 """
 function unitcircle(N::Integer)
     th = (0:N-1)/N*2*pi
     x = [cos.(th)'; sin.(th)']
+    nx = copy(x)
     w = (2*pi/N)*ones(N)
-    x,w
+    kap = -1.0*ones(N)
+    x,w,nx,kap
 end
 
 """
-starfish(N::Integer=100,freq::Integer=5,ampl=0.3,rot=1.0) -> x,w
+x,w,nx,kappa = starfish(N::Integer=100,freq::Integer=5,ampl=0.3,rot=1.0)
     
-Periodic trap rule quadrature for smooth starfish. Returns 2*N node coords,
-N weights. The first node is at theta=0.
+Periodic trap rule quadrature for smooth starfish.
+Returns x = 2*N node coords, w = N weights. 
+nx is unit normals 2*N, kappa is curvatures.
+The first node is at theta=0.
 
 *** to doc, output struct instead, etc.
 """
@@ -97,5 +141,8 @@ function starfish(N::Integer=100,freq::Integer=5,ampl=0.3,rot=1.0)
     xp = [rp.*c.-r.*s; rp.*s.+r.*c]  # velocity
     sp = sqrt.(sum(xp.^2,dims=1))        # speed at nodes
     w = (2*pi/N)*sp                   # PTR
-    x,w
+    nx = [0 -1; 1 0] * xp./sp
+    xpp = [perispec_deriv(xp[1,:]) perispec_deriv(xp[2,:])]'  # 2*N
+    kap = sum(xpp.*nx,dims=1) ./ sp.^2
+    x,w,nx,kap
 end

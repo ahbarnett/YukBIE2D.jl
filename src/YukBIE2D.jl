@@ -9,7 +9,9 @@ export
     starfish,
     interpmat1d,
     clencurt,
-    chebydiffmat
+    chebydiffmat,
+    perispec_deriv,
+    perispec_deriv!
 
 include("layerpots.jl")
 export
