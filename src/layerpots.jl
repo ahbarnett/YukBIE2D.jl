@@ -74,7 +74,7 @@ end
 """
     YukSLPmat_selfcrude
      
-Crude (1st-order) version of square special sel-evaluation quadrature matrix
+Crude (1st-order) version of square special self-evaluation quadrature matrix
 mapping density values to potentials at nodes on a curve, for Yukawa
 (aka modified Helmholtz) S operator.
 Nodes sx and weights sw must be good for line integrals on the curve.
