@@ -139,10 +139,11 @@ function starfish(N::Integer=100,freq::Integer=5,ampl=0.3,rot=1.0)
     c = cos.(th); s = sin.(th)
     x = [r.*c; r.*s]
     xp = [rp.*c.-r.*s; rp.*s.+r.*c]  # velocity
-    sp = sqrt.(sum(xp.^2,dims=1))        # speed at nodes
+    #di(xp[:,1])
+    sp = sqrt.(vec(sum(xp.^2,dims=1)))        # speed at nodes
     w = (2*pi/N)*sp                   # PTR
-    nx = [0 -1; 1 0] * xp./sp
+    nx = [xp[2,:]./sp -xp[1,:]./sp]'            # 2*N
     xpp = [perispec_deriv(xp[1,:]) perispec_deriv(xp[2,:])]'  # 2*N
-    kap = sum(xpp.*nx,dims=1) ./ sp.^2
+    kap = vec(sum(xpp.*nx,dims=1) ./ sp'.^2)   # curvature
     x,w,nx,kap
 end

@@ -5,12 +5,15 @@ using LinearAlgebra
 @testset "unitcircle" begin
     x,w,nx,kap = unitcircle(100)
     @test sum(w) ≈ 2*pi rtol=1e-14
+    @test norm(sum(w'.*nx,dims=2)) ≈ 0  atol=1e-14    # integral of nx vector
+    @test sum(w.*kap) ≈ -2*pi  rtol=1e-13    # integral of kappa
 end
 @testset "starfish" begin
     x,w,nx,kap = starfish(300)
-    @test sum(w.*nx) ≈ 0  atol=1e-13    # integral of nx vector
-    x2,w2,nx2,kap2 = starfish(400)
-    @test sum(w) ≈ sum(w2) rtol=1e-14   # perim convergence, is spectral
+    @test norm(sum(w'.*nx,dims=2)) ≈ 0  atol=1e-14    # integral of nx vector
+    @test sum(w.*kap) ≈ -2*pi  rtol=1e-10    # integral of kappa
+    _,w2,_,_ = starfish(350)
+    @test sum(w) ≈ sum(w2) rtol=1e-13   # perim convergence, is spectral
 end
 
 @testset "spectral" begin
