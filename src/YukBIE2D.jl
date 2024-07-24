@@ -20,6 +20,6 @@ export
     YukSLPmat,
     YukSLPmats,
     YukSLPmat_selfcrude,
-    dummy
+    YukSLPdermat_selfcrude
 
 end

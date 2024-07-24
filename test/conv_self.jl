@@ -29,6 +29,7 @@ end
 @gp Ns errs "w lp t 'on-surf err'"
 @gp :- "set logscale x" "set logscale y" xlabel="N"
 @gp :- Ns 0.2*Ns.^(-1) "w l dashtype 2 t 'O(h)'"  # verify 1st-order
+Gnuplot.save("pics/slp_self_conv.png", term="pngcairo")
 
 println("self-conv test wrt N, to unknown on closed starfish...")
 Ns = 100:100:500
@@ -53,7 +54,8 @@ tx = [kron(o,g)';kron(g,o)']  # fill grid of targs (ok to fill, sim size to u)
 u = YukSLP(tx,sx,sw,dens,ka)
 u = reshape(u,(ng,ng))
 @gp :pot g g u "w image notit" "set size square" palette(:jet1) xlab="x" ylab="y"
-@gp :pot :- sx[1,:] sx[2,:] "w lp pt 7 ps 0.3 lc '#000000'"
+@gp :- :pot sx[1,:] sx[2,:] "w lp pt 7 ps 0.3 lc '#000000'"
+Gnuplot.save(:pot, "pics/pot_conv.png", term="pngcairo")
 # to kill the window...
 #Gnuplot.quit(:pot)
 # to kill all windows...
@@ -75,8 +77,8 @@ for j in eachindex(Ns)
         u = YukSLP(tx,sx,sw,dens,ka)
         u = reshape(u,(ng,ng))
         @gp :ufar g g u "w image notit" "set size square" palette(:jet1) xlab="x" ylab="y"
-        @gp :ufar :- sx[1,:] sx[2,:] "w lp pt 7 ps 0.3 lc '#000000'"
+        @gp :- :ufar sx[1,:] sx[2,:] "w lp pt 7 ps 0.3 lc '#000000'"
     end
 end
 # we see cond# grow like N
-
+Gnuplot.save(:ufar, "pics/ufar.png", term="pngcairo")

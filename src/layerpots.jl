@@ -45,7 +45,7 @@ function YukSLPeval(tx,tnx,sx,sw,dens::Vector{T},kappa; grad=true) where T
             u[i] += pdw * besselk0(kappa*r)
             if grad                  # not much perf hit for conditional
                 costh = (d1*tnx[1,i] + d2*tnx[2,i])/r
-                un[i] += pdw * costh * kappa * besselk1(kappa*r)
+                un[i] -= pdw * costh * kappa * besselk1(kappa*r)
             end
         end
     end
@@ -121,7 +121,7 @@ function YukSLPmats(tx,tnx,sx,sw,kappa; grad=true)
                 A[i,j] = prefac*sw[j] * besselk0(kappa*r)
                 if grad                  # not much perf hit for conditional
                     costh = (d1*tnx[1,i] + d2*tnx[2,i])/r
-                    An[i,j] = prefac*sw[j] * costh * kappa*besselk1(kappa*r)
+                    An[i,j] = -prefac*sw[j] * costh * kappa*besselk1(kappa*r)
                 end
             end
         end
@@ -146,7 +146,6 @@ Inputs:
     `kappa` : modified Helmholtz param, ie, PDE is (Delta - kappa^2)u = 0
 """
 YukSLPmat(tx,sx,sw,kappa) = YukSLPmats(tx,[],sx,sw,kappa,grad=false)[1]
-
 
 
 """
@@ -174,4 +173,37 @@ function YukSLPmat_selfcrude(sx,sw,kappa)
         A[j,j] = -sw[j]/(2*pi) * (log(kappa*sw[j]/2)-1)
     end
     A
+end
+
+"""
+    DT = YukSLPdermat_selfcrude(sx,snx,curv,sw,kappa)
+     
+Crude (3rd-order accurate) square self-evaluation Nystrom matrix
+mapping density values to normal-derivatives at target nodes on a closed
+curve with periodic trapezoid rule (PTR) quadrature, for Yukawa
+(aka modified Helmholtz) S operator. Ie, the matrix for D^T.
+The +-I/2 term is not included and must be added to get the limit
+approaching the curve (+I/2 for the side opposite the normal).
+Nodes sx and weights sw must be good for PTR integrals on the curve.
+This may fail at endpoints for non-PTR quadrature on open arc.
+Needs h (node spacing) << 1/kappa (Yukawa lengthscale).
+
+Inputs:
+    `sx` : 2*N src node coords
+    `snx` : 2*N unit normal coords at nodes
+    `curv` : N vec of curvatures at nodes
+    `sw` : N vec of src node (speed) weights
+    `kappa` : modified Helmholtz param, ie, PDE is (Delta - kappa^2)u = 0
+Outputs:
+    `DT` : N*N matrix approximating the D^T operator
+"""
+function YukSLPdermat_selfcrude(sx,snx,curv,sw,kappa)
+    # first fill self-eval mat w/ plain quadr rule (diag = Inf)
+    _,DT = YukSLPmats(sx,snx,sx,sw,kappa)       # discard val matrix
+    # override just diag entries
+    for j in eachindex(sw)
+        # analytic formula Laplace, leaves r^2 log(r) nonsmoothness
+        DT[j,j] = sw[j]*curv[j]/(4*pi)   # note +sign
+    end
+    DT
 end

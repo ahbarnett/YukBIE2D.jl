@@ -25,7 +25,7 @@ N = 80; sx,sw = unitcircle(N)      # source curve
     # test directional deriv vs finite diff
     h=1e-5; dir = [0.6,-0.8]; tx2 = [tx.+dir*h/2 tx.-dir*h/2]
     u2 = YukSLP(tx2,sx,sw,dens,ka)
-    unapprox = (u2[2]-u2[1])/h
+    unapprox = (u2[1]-u2[2])/h         # O(h^2) FD approx to dir.grad u
     _,un = YukSLPeval(tx,dir,sx,sw,dens,ka)
     @test unapprox ≈ un[1] atol=10*h^2
 
