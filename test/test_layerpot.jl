@@ -12,7 +12,7 @@ N = 80; sx,sw = unitcircle(N)      # source curve
 # * each @testset has its own local scope (not good for keeping setups)
 # * verbose=true only prints nested testset names, *not* individual tests.
 @testset "YukSLP" verbose=true begin
-    dens = ones(N)
+    dens = ones(N)              # needed for circle Fourier mode test
     u = YukSLP(tx,sx,sw,dens,ka)
     # solve m=0 Fourier mode case by jump matching a.I0(ka.r) r<1, b.K0(ka.r) r>1:
     bcoeff = 1/(ka*(besselk(1,ka)+besselk(0,ka)*besseli(1,ka)/besseli(0,ka)))
@@ -21,6 +21,16 @@ N = 80; sx,sw = unitcircle(N)      # source curve
     @test abserr<1e-15             # quadrature error
     # try Julia's logger as good way for feedback during tests?
     @info "SLP vs analytic far from unit dens on unit circle:" abserr
-    A = YukSLPmat(tx,sx,sw,ka)
-    @test norm(A*dens-u)/norm(u) < 1e-15   # is pure rounding error
+
+    # test directional deriv vs finite diff
+    h=1e-5; dir = [0.6,-0.8]; tx2 = [tx.+dir*h/2 tx.-dir*h/2]
+    u2 = YukSLP(tx2,sx,sw,dens,ka)
+    unapprox = (u2[2]-u2[1])/h
+    _,un = YukSLPeval(tx,dir,sx,sw,dens,ka)
+    @test unapprox ≈ un[1] atol=10*h^2
+
+    # test matrices match direct eval for a density
+    A,An = YukSLPmats(tx,dir,sx,sw,ka)
+    @test norm(A*dens-u)/norm(u) < 1e-15   # pure rounding. len-1 vec
+    @test norm(An*dens-un)/norm(un) < 1e-15   # pure rounding error. "
 end

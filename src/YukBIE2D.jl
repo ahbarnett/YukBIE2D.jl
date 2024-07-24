@@ -16,7 +16,10 @@ export
 include("layerpots.jl")
 export
     YukSLP,
+    YukSLPeval,
     YukSLPmat,
-    YukSLPmat_selfcrude
+    YukSLPmats,
+    YukSLPmat_selfcrude,
+    dummy
 
 end
