@@ -1,13 +1,14 @@
 # simple solve of modified Helmholtz PDE with Dirichlet BC on an arc, using
-# SLP on the arc. Barnett 7/25/24
+# SLP on the arc. 2nd expt does no-clfux outer bdry circle.  Barnett 7/25/24
 using YukBIE2D
 using LinearAlgebra
 using Printf
 using Gnuplot
+blackdots = "w p ps 0.3 pt 7 lc '#000000'"
 using ColorSchemes  # for gnuplot heatmaps
 
-verb = 0
-ka = 0.01      # aka phi, inverse decay length
+verb = 0      # 0 does just final expt. >0 includes earlier tests
+ka = 0.1      # aka phi, inverse decay length (make <<1 to make u approx 1)
 # arc param on [-1,1]
 a = 0.5; b=0.1          # angular half-width, angular offset
 seg(t) = [-1.0+cos(a*t+b),sin(a*t+b)]   # fit inside unit circle
@@ -41,7 +42,7 @@ o = ones(size(g))           # also row-vec
 tx = [kron(o,g)';kron(g,o)']  # fill grid of targs (ok to fill, sim size to u)
 
 doplainbvp = (verb>0)
-if doplainbvp
+if doplainbvp       # simple SLP solve of ext Dirichlet BVP on arc...
 Ns=20:20:100
 for (k,N) in enumerate(Ns)    # ...... conv
     sx,sw,t = arcquad(seg,segp,N)
@@ -54,8 +55,8 @@ for (k,N) in enumerate(Ns)    # ...... conv
         u,_ = YukSLPeval(tx,[],sx,sw,dens,ka,grad=false)   # grid eval
         u = reshape(u,(ng,ng))
         @gp g g u "w image notit" palette(:jet1) xlab="x" ylab="y"
-        @gp :- sx[1,:] sx[2,:] "w p" "set size ratio -1"
-        @gp :- [xtest[1]] [xtest[2]] "w p pt 7"
+        @gp :- sx[1,:] sx[2,:] blackdots "set size ratio -1"
+        @gp :- [xtest[1]] [xtest[2]] "w p"
         Gnuplot.save("pics/openarc_bvp_u.png",term="pngcairo")
         @gp dens "w lp t 'dens vs j'"
         Gnuplot.save("pics/openarc_bvp_dens.png",term="pngcairo")
@@ -67,7 +68,7 @@ end
 Ns=20:20:100               # arc nodes (-1)
 for (k,N) in enumerate(Ns)    # ...... conv
     sx,sw,t = arcquad(seg,segp,N)
-    Nb = 3*N                   # since bdry longer than seg
+    Nb = 2*N                   # since bdry longer than seg
     bx,bw,bnx,bcurv = unitcircle(Nb)     # discretize bdry
     # setup 2x2 lin sys:       A [dens1; dens2] = [f; 0]
     # where dens1 is on arc, dens2 on outer bdry
@@ -87,8 +88,8 @@ for (k,N) in enumerate(Ns)    # ...... conv
         u,_ = YukSLPeval(tx,[],sx,sw,dens1,ka,grad=false) .+ YukSLPeval(tx,[],bx,bw,dens2,ka,grad=false)
         u = reshape(u,(ng,ng))
         @gp g g u "w image notit" palette(:jet1) xlab="x" ylab="y"
-        @gp :- sx[1,:] sx[2,:] "w p ps 0.3 pt 7 lc '#000000'" "set size ratio -1"
-        @gp :- bx[1,:] bx[2,:] "w p ps 0.3 pt 7 lc '#000000'"
+        @gp :- sx[1,:] sx[2,:] blackdots "set size ratio -1"
+        @gp :- bx[1,:] bx[2,:] blackdots
         @gp :- [xtest[1]] [xtest[2]] "w p"
         Gnuplot.save("pics/openarc_noflux_u.png",term="pngcairo")
         @gp dens "w lp t 'dens vs j'"
