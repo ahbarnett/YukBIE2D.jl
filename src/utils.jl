@@ -36,7 +36,7 @@ function clencurt(n)
     if n%2==1 W=[W;0.0]; end            # include extra pi-freq term if odd
     w = ifft([4.0; W; W[end-1:-1:1]])    # 4 is the zero-freq term
     w = [w[1]/2; w[2:n]; w[1]/2]       # endpoints get 1/2 weight since want 1/2 circle
-    x,w
+    x,real.(w)
 end
 
 
