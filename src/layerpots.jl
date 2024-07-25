@@ -29,13 +29,13 @@ function YukSLPeval(tx,tnx,sx,sw,dens::Vector{T},kappa; grad=true) where T
     Ns=size(sx,2)
     @assert length(sw)==Ns
     @assert length(dens)==Ns
-    u = zeros(T,Nt)
-    un::Vector{Float64} = zeros(T,0)    # un "captured var" => explicit type! 
+    u = zeros(T,Nt); un = T[]  
     if grad
         un = zeros(T,Nt)    # the reallocation led to un being "captured" :(
         @assert size(tnx)==size(tx)
     end
     prefac = 1/(2*pi)
+    let un=un     # un "captured var" in a "closure" by @threads. see Discourse
     @threads for i in eachindex(u)
         for j in eachindex(dens)
             d1 = tx[1,i]-sx[1,j]; d2 = tx[2,i]-sx[2,j] 
@@ -48,6 +48,7 @@ function YukSLPeval(tx,tnx,sx,sw,dens::Vector{T},kappa; grad=true) where T
                 un[i] -= pdw * costh * kappa * besselk1(kappa*r)
             end
         end
+    end
     end
     u, un
 end
@@ -109,6 +110,7 @@ function YukSLPmats(tx,tnx,sx,sw,kappa; grad=true)
         An = Matrix{T}(undef,Nt,Ns)
     end
     prefac = 1/(2*pi)
+    let An=An    # let block since An "captured" due to @threads; see Discourse
     @threads for j in eachindex(sw)
         for i=1:Nt
             d1 = tx[1,i]-sx[1,j]; d2 = tx[2,i]-sx[2,j] 
@@ -125,6 +127,7 @@ function YukSLPmats(tx,tnx,sx,sw,kappa; grad=true)
                 end
             end
         end
+    end
     end
     A, An
 end

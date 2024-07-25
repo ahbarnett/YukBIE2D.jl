@@ -20,10 +20,14 @@ end
     f(x) = sin(1+3*x)        # pick analytic func
     fp(x) = 3*cos(1+3*x)
     @testset "clencurt" begin
-        x,w = clencurt(20)        
         Iex = f(1.0)-f(-1.0)
+        x,w = clencurt(20)        
         I = sum(w.*fp.(x))
-        @debug "clencurt err" I-Iex
+        @debug "clencurt err (even)" I-Iex
+        @test I ≈ Iex rtol=1e-14
+        x,w = clencurt(21)        
+        I = sum(w.*fp.(x))
+        @debug "clencurt err (odd)" I-Iex
         @test I ≈ Iex rtol=1e-14
     end
     @testset "chebydiffmat" begin

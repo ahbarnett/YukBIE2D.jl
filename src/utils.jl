@@ -24,22 +24,19 @@ end
 
 
 """
-clencurt(n::Integer) -> nodes, weights
-for (n+1)-point Clenshaw-Curtis quadrature on [-1,1].
-Taken from Toby Driscoll's RNC book. n must be even. nodes in ascending order
+nodes, weights = clencurt(n::Integer)
+
+(n+1)-point Clenshaw-Curtis quadrature on [-1,1]. nodes in ascending order
+Adapted from Barnett mpspack matlab.
 """
 function clencurt(n)
-    @assert iseven(n) "Value of `n` must be an even integer."
-    # set x as Chebyshev extreme nodes...
-    θ = [ i*π/n for i in 0:n ]
-    x = -cos.(θ)
-    # Compute the C-C weights c...
-    c = similar(θ)
-    c[[1,n+1]] .= 1/(n^2-1)        # end weights
-    s = sum( cos.(2k*θ[2:n])/(4k^2-1) for k in 1:n/2-1 )
-    v = @. 1 - 2s - cos(n*θ[2:n])/(n^2-1)
-    c[2:n] = 2v/n
-    x, c
+    th = [i*π/n for i in 0:n]      # Chebyshev extreme nodes
+    x = -cos.(th)
+    W = kron(-1.0./((1:n÷2).^2 .- 0.25), [0,1])   # for either even or odd
+    if n%2==1 W=[W;0.0]; end            # include extra pi-freq term if odd
+    w = ifft([4.0; W; W[end-1:-1:1]])    # 4 is the zero-freq term
+    w = [w[1]/2; w[2:n]; w[1]/2]       # endpoints get 1/2 weight since want 1/2 circle
+    x,w
 end
 
 
